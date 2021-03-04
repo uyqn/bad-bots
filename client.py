@@ -1,45 +1,72 @@
-# Importing necessary modules:
-import socket  # For TCP connections
-import sys  # For command handling commandline parameters
+import sys
+import Participant
+import socket
+import pickle
 import threading
-from Bots import Bot  # Our bots
 
-# Handling exception if too few arguments are passed
-"""
+# Define a dictionary of available bots:
+available_bots = {
+    'alice': Participant.Alice()
+}
+
+# Force user to specify ip and port
 try:
     ip = sys.argv[1]
     port = int(sys.argv[2])
 except IndexError:
-    print("Usage of client.py: $python3 client.py ip port [optional bot]")
-    sys.exit()  # Terminating client.py if necessary args has not been passed to the command
-"""
+    print("IP and port must be specified. Correct usage e.g $py client.py localhost 2410")
+    sys.exit()
 
-participant = sys.argv[1]
+# Define the participant:
+try:
+    participant = \
+        available_bots[sys.argv[3].lower()] \
+        if len(sys.argv) == 4 \
+        else Participant.Person(input("Choose a nickname: "))
+except KeyError:
+    print(f"Sorry, cannot summon {sys.argv[3]}")
+    sys.exit()
 
-# Create a client socket and connect it to the server:
+# Start the TCP connection:
 client = socket.socket()
-client.connect(("localhost", 4242))
-client.send(participant.encode("utf-8"))  # Sending the name of the participant to the server
+client.connect((ip, port))
+
+# Send the server about who has connected:
+client.send(pickle.dumps(participant))
 
 
-# Method for receiving broadcasted messages:
-def receive_broadcast():
+# So, we want to be able to receive the broadcast message:
+def receive_data():
     while True:
         try:
-            message = client.recv(1024).decode("utf-8")
+            # We will have the server send back the participant and the message that they sent:
+            sender, message = pickle.loads(client.recv(1024))
+
+            # Then we will print the message from the sender:
             print(message)
+
+            # Then we check if the sender is a person or a bot
+            if isinstance(participant, Participant.Bot) and isinstance(sender, Participant.Person):
+                # If this client is a bot and the sender is a person then we will have the bot respond to the message:
+                response = participant.respond_to(sender, message)
+                data = pickle.dumps((participant, response))
+                client.send(data)
         except:
-            print("Error occurred closing connection:")
-            client.close()
+            print("Server is down!")
             break
+    sys.exit()
 
 
-# Method for sending a message:
-def send_message():
+# We also want to be able to send data. Persons are the only ones able to send messages
+def send_data():
     while True:
-        message = f"{participant}: {input('')}".encode("utf-8")
-        client.send(message)
+        data = (participant, input(""))
+        client.send(pickle.dumps(data))
 
 
-threading.Thread(target=receive_broadcast).start()
-threading.Thread(target=send_message).start()
+# At last we have to start threads to run both functions simultanously:
+threading.Thread(target=receive_data).start()
+
+# Since only persons are able to send messages:
+if isinstance(participant, Participant.Person):
+    threading.Thread(target=send_data).start()

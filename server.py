@@ -1,38 +1,51 @@
+import sys
 import socket
+import pickle
 import threading
+import Participant
+
+try:
+    ip = sys.argv[1]
+    port = int(sys.argv[2])
+except IndexError:
+    print("IP and port must be specified. Correct usage e.g $py server.py localhost 2410")
+    sys.exit()
 
 server = socket.socket()
-server.bind(("localhost", 4242))
+server.bind((ip, port))
 server.listen()
-
-print("Server is running...")
 
 clients = {}
 
+print("Server is running...")
 
-# Define a function that broadcast messages to all the other clients
-def broadcast(message):
+
+def broadcast(sender, message):
     for c in clients:
-        c.send(message.encode("utf-8"))
+        data = pickle.dumps((sender, f"{sender.name}: {message}"))
+        c.send(data)
 
 
-def receive_message_from(client):
-    while True:  # Tell the server to attempt to retrieve data from the client
+def listen_for_data(c):
+    while True:
         try:
-            broadcast(client.recv(1024).decode("utf-8"))  # The program will stay here until data is received
-        except:  # If the client is terminated then consider that this client has signed off
-            participant = clients.pop(client)  # Remove the client from the list of connected clients
-            broadcast(f"{participant} has left the chat!")  # Tell every one else that the participant has left
-            break  # Get out of this loop
+            sender, message = pickle.loads(c.recv(1024))
+            broadcast(sender, message)
+        except (ConnectionResetError, OSError):
+            leaver = clients.pop(c, Participant.Bot("someone"))
+            broadcast(leaver, "left the chat!")
+            print(f"{leaver.name}: disconnected from the server")
+            c.close()
+            break
 
 
 while True:
-    client, address = server.accept()  # When a participant makes a connection
-    participant = client.recv(1024).decode("utf-8")  # Broadcast to all the other clients that participant has joined
-    broadcast(f"{participant} has joined the chat!")
-    print(f"{participant} has joined the server on {address}")  # Inform the server admins about the new participant
-    clients[client] = participant  # Add client to dictionary
+    client, (ip, port) = server.accept()  # Wait for connections
+    participant = pickle.loads(client.recv(1024))  # Receive data from connected client
+    print(f"{participant.name} joined from {ip}:{port}")  # Print the information for sys admins
 
-    # Start listening for any data sent from this client
-    threading.Thread(target=receive_message_from, args=(client,)).start()
-    # Get back to checking for new connections after starting this thread.
+    # So when a client is connected we add the client to a "list" of connected clients. We use dictionary since it is
+    # faster to access the items
+    clients[client] = participant
+    threading.Thread(target=listen_for_data, args=(client,)).start()
+    broadcast(participant, f"{participant.name} has joined the chat!")  # Tell everybody who has joined
