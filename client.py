@@ -43,18 +43,21 @@ def receive_data():
             sender, message = pickle.loads(client.recv(1024))
 
             # Then we will print the message from the sender:
-            print(message)
+            if sender.name == "server":
+                print(f"{message}")
+            elif sender.name != participant.name:
+                print(f"{sender.name}: {message}")
 
             # Then we check if the sender is a person or a bot
             if isinstance(participant, Participant.Bot) and isinstance(sender, Participant.Person):
                 # If this client is a bot and the sender is a person then we will have the bot respond to the message:
-                response = participant.respond_to(sender, message)
+                response = participant.respond_to(message)
+                print(f"{participant.name}: {response}")
                 data = pickle.dumps((participant, response))
                 client.send(data)
-        except:
+        except ConnectionResetError:
             print("Server is down!")
             break
-    sys.exit()
 
 
 # We also want to be able to send data. Persons are the only ones able to send messages

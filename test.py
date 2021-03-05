@@ -2,6 +2,7 @@ import Participant
 
 alice = Participant.Alice()
 
-dictionary = {1:1, 3:4, 2:2}
+message = "Let's jump around!"
+list_of_actions = {None: "Yoyo"}
 
-print(3 in dictionary)
+print(alice.respond_to(message))

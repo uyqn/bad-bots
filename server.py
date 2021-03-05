@@ -22,7 +22,7 @@ print("Server is running...")
 
 def broadcast(sender, message):
     for c in clients:
-        data = pickle.dumps((sender, f"{sender.name}: {message}"))
+        data = pickle.dumps((sender, message))
         c.send(data)
 
 
@@ -31,10 +31,10 @@ def listen_for_data(c):
         try:
             sender, message = pickle.loads(c.recv(1024))
             broadcast(sender, message)
-        except (ConnectionResetError, OSError):
-            leaver = clients.pop(c, Participant.Bot("someone"))
+        except ConnectionResetError:
+            leaver = clients.pop(c, Participant.Person("someone"))
             broadcast(leaver, "left the chat!")
-            print(f"{leaver.name}: disconnected from the server")
+            print(f"{leaver.name} disconnected from the server")
             c.close()
             break
 
@@ -48,4 +48,4 @@ while True:
     # faster to access the items
     clients[client] = participant
     threading.Thread(target=listen_for_data, args=(client,)).start()
-    broadcast(participant, f"{participant.name} has joined the chat!")  # Tell everybody who has joined
+    broadcast(Participant.Person("server"), f"{participant.name} has joined the chat!")  # Tell everybody who has joined
