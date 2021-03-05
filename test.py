@@ -1,8 +1,7 @@
 import Participant
+import random
+import re
 
-alice = Participant.Alice()
+batman = Participant.Batman()
 
-message = "Let's jump around!"
-list_of_actions = {None: "Yoyo"}
-
-print(alice.respond_to(message))
+print(isinstance(batman, Participant.Bot))
