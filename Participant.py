@@ -92,6 +92,11 @@ class Alice(Bot):
         'play': "All you do is play...",
         'complain': "Sorry, I am not interested in your complains...",
         'hug': "Yes! I love hugs! Hug your screen, let me feel your love!",
+        'sing': "La-La-La-La"
+                "\n\tBa-ba-ri-as-ras-ti-ti-ti-ras-ti-ti"
+                "\n\tBa-ba-ri-as-ras-ti-ti-ta"
+                "\n\tBa-ba-ri-as-ras-ti-ti-ti-ras-ti-ti"
+                "\n\tRastis! Rastis! Ra-ti-ti-la",
 
         'identify': "It is I, Alice the bot!",
         'who': "My name is Alice, and I am a bot! Beep bop!",
@@ -146,6 +151,8 @@ class Bob(Bot):
         'play': "I ain't ever playing! Always have your guard up!",
         'complain': "Nah man, can't complain to the boss...",
         'hug': "Maybe I need a hug :(",
+        'sing': "Been spendin' most their lives livin' in the gangsta's paradise"
+                "\n\tKeep spendin' most our lives livin' in the gangsta's paradise",
 
         'identify': "Gangster-bot-Bob to ya rescue!",
         'who': "Yo! I'm Bob also known as gangster-bot-Bob!",
@@ -191,6 +198,7 @@ class Batman(Bot):
         'play': "I only play with dangerous criminals!",
         'complain': "If you got time to complain, I suggest you spend that time to something else...",
         'hug': "No!",
+        'sing': "Na, na, na, na, na, na, na, na, na, na, na, na, na Batman!",
 
         'identify': "I'm Batman! Wait I'm a bot... I'm BOTMAN!",
         'who': "I'm Batman! Wait, that's not right... I'm Botman protector of Botham!",
@@ -215,6 +223,7 @@ class Batman(Bot):
                 if action == 'who' or action == 'identify':
                     self.ACTIONS.update({'who': "I'm Botman, protector of Botham!"})
                     self.ACTIONS.update({'identify': "I'm Botman!"})
+                    self.ACTIONS.update({'sing': "Na, na, na, na, na, na, na, na, na, na, na, na, na Botman!"})
             return response
 
     def add_random_actions(self):
