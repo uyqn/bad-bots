@@ -9,7 +9,9 @@ import re
 available_bots = {
     'alice': Participant.Alice(),
     'bob': Participant.Bob(),
-    'batman': Participant.Batman()
+    'batman': Participant.Batman(),
+    'james': Participant.James(),
+    'yoda': Participant.Yoda()
 }
 
 # Force user to specify ip and port
@@ -24,8 +26,8 @@ except (IndexError, ValueError):
 try:
     participant = \
         available_bots[sys.argv[3].lower()] \
-            if len(sys.argv) == 4 \
-            else Participant.Person(input("Choose a nickname: "))
+        if len(sys.argv) == 4 \
+        else Participant.Person(input("Choose a nickname: "))
 except KeyError:
     print(f"Sorry, cannot summon {sys.argv[3]}")
     sys.exit()
@@ -75,7 +77,7 @@ def receive_data():
 # We also want to be able to send data. Persons are the only ones able to send messages
 def send_data():
     while True:
-        message = re.sub("[ ]+", " ", input("").strip())  # clean up the message
+        message = re.sub("[ ]+", " ", input().strip())  # clean up the message
         # This function performs a command if the message is a command, and nothing else otherwise
         perform_command(message)
         client.send(pickle.dumps((participant, message)))

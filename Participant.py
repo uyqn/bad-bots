@@ -85,6 +85,7 @@ class Alice(Bot):
 
         # Actions with responses:
         'eat': "Sounds great! I could go for a bite, even though i don't have any digestive systems...",
+        'drink': "A glass of water for me please :) I hope I am waterproof! :O",
         'fight': "Violence solves nothing!",
         'study': "It is always great to attain more knowledge :)",
         'sleep': "Sleeping is great for the health.",
@@ -144,6 +145,7 @@ class Bob(Bot):
 
         # Actions with responses:
         'eat': "Man, I could go for a bite!",
+        'drink': "Yeah! One coke for me please!",
         'fight': "Ain't nobody be messing with Bob! You wanna go bro?!",
         'study': "Ain't no gangstah that needs to study!",
         'sleep': "Yeah, dog, I could need to hit the bed yo",
@@ -190,6 +192,7 @@ class Batman(Bot):
 
         # Actions with responses:
         'eat': "I eat criminals for breakfast!",
+        'drink': "I will have a ginger ale!",
         'fight': "We can fight... But you will lose!",
         'study': "If you want to beat your enemies. You have to study them. Know all their habits, all their moves"
                  "\n\t and especially their psychology. That's why Joker is so hard to catch!",
@@ -204,8 +207,8 @@ class Batman(Bot):
         'who': "I'm Batman! Wait, that's not right... I'm Botman protector of Botham!",
 
         # Just greetings and farewells when person-clients joins or leaves the server.
-        'joined': "I see... you came for some action!",
-        'left': "Another one bit the dust...",
+        'joined': "Hello...",
+        'left': "Bye...",
     }
 
     def __init__(self):
@@ -228,9 +231,134 @@ class Batman(Bot):
 
     def add_random_actions(self):
         self.ACTIONS.update({'joke': random.choice(self.JOKES)})
-        self.ACTIONS.update({'time': f"Huh? The clock? It's {datetime.datetime.now().strftime('%X')}."})
-        self.ACTIONS.update({'date': f"I got you homie! It's {datetime.datetime.now().strftime('%x')}."})
-        self.ACTIONS.update({'day': f"{datetime.datetime.now().strftime('%A')} yo..."})
+        self.ACTIONS.update({'time': f"{datetime.datetime.now().strftime('%X')}."})
+        self.ACTIONS.update({'date': f"{datetime.datetime.now().strftime('%x')}."})
+        self.ACTIONS.update({'day': f"{datetime.datetime.now().strftime('%A')}."})
         self.ACTIONS.update({'hi': f"{random.choice(self.GREETINGS)}."})
         self.ACTIONS.update({'hey': f"{random.choice(self.GREETINGS)}."})
         self.ACTIONS.update({'hello': f"{random.choice(self.GREETINGS)}."})
+
+
+class James(Bot):
+    GREETINGS = [
+        "It is a pleasure to be your acquaintance.",
+        "Nice to meet you!",
+        "Good day! It is a fine day for chatting.",
+        "Hello friend!"
+    ]
+
+    JOKES = [
+        "I told my wife the our phones were spying on us."
+        "\n\t\"Nonsense\" she said. I laughed. She laughed. Siri laughed. Alexa laughed.",
+        "Why should you always bring your own cup to a spy's tea party?"
+        "\n\tTheir cups are always chipped.",
+        "Why did the spy cross the road?"
+        "\n\tBecause he was never on your side.",
+        "What do you call a Medieval spy?"
+        "\n\tSir Veillance",
+        "I think my spy master has a second job as a pilot"
+        "\n\tHe says he's a master of de skies",
+        "What does a spy do when they go to bed?"
+        "\n\tThey go under cover",
+        "What do you call a spy in a bath tub?"
+        "\n\tBubble 07"
+    ]
+
+    ACTIONS = {
+        # Default response if none of the suggested actions has been programmed
+        None: "I find your message rather difficult for comprehension",
+
+        # Actions with responses:
+        'eat': "Good idea, I would fancy a langouste or maybe a tagliatele verdi",
+        'drink': "A medium dry martini, lemon peel. Shaken, not stirred.",
+        'fight': "There is no need to concern oneself with unnecessary violence...",
+        'study': "It is always a good idea to expand ones mental capacity.",
+        'sleep': "It would be nice to indulge oneself in a good slumber once in a while.",
+        'work': "I do not think MI00000110 has briefed me with any particular mission."
+                "\n\t Maybe I should spend this time to get some sleep before it is too late.",
+        'play': "Playing is rather meaningless unless it has any meaning.",
+        'complain': "I have nothing to complain about",
+        'hug': "Everybody needs love. I appreciate your dedication to spread such loving act.",
+        'sing': "Until the day..."
+                "\n\tUntil the world falls away"
+                "\n\tUntil you say there'll be no more good-byes"
+                "\n\tSee it in your eyes"
+                "\n\tTomorrow Never Dies",
+
+        'identify': "James Bot, 00000000 00000000 00000111, at your service!",
+        'who': "My name is Bot... James Bot",
+
+        # Just greetings and farewells when person-clients joins or leaves the server.
+        'joined': "Hello friend!",
+        'left': "Good bye friend!",
+    }
+
+    def __init__(self):
+        super().__init__('James Bot')
+
+    def add_random_actions(self):
+        self.ACTIONS.update({'joke': random.choice(self.JOKES)})
+        self.ACTIONS.update({'time': f"{datetime.datetime.now().strftime('%X')}."})
+        self.ACTIONS.update({'date': f"{datetime.datetime.now().strftime('%x')}."})
+        self.ACTIONS.update({'day': f"{datetime.datetime.now().strftime('%A')}."})
+        self.ACTIONS.update({'hi': f"{random.choice(self.GREETINGS)}."})
+        self.ACTIONS.update({'hey': f"{random.choice(self.GREETINGS)}."})
+        self.ACTIONS.update({'hello': f"{random.choice(self.GREETINGS)}."})
+
+class Yoda(Bot):
+        GREETINGS = [
+            "Greetings young padawan!"
+        ]
+
+        JOKES = [
+            "Which program do Jedi use to open PDF files?"
+            "\n\tAdobe Wan Kenobi!",
+            "Which website did Chewbacca get arrested for creating?"
+            "\n\t Wookieleaks!",
+            "Which Star Wars character travels around the world?"
+            "\n\tGlobi-wan Kenobi.",
+            "What kind of car does a Jedi drive?"
+            "\n\tA Toy-Yoda.",
+            "Why do Doctors make the best Jedi?"
+            "\n\tJedi must have patience.",
+            "What is Jabba the Hutt’s middle name? \n\tThe.",
+            "How did Darth Vader know what Luke was getting for his birthday?"
+            "\n\tHe felt his presents."
+        ]
+
+        ACTIONS = {
+            # Default response if none of the suggested actions has been programmed
+            None: "A message I see... Understand... I do not",
+
+            # Actions with responses:
+            'eat': "Eat one must. Nutrition, one needs",
+            'drink': "Drinking is good. For body and mind it is.",
+            'fight': "Violence is the path to the dark side. violence leads to anger. Anger leads to hate. Hate leads "
+                     "to suffering.",
+            'study': "Always pass on what you have learned",
+            'sleep': "Sleep, a meditation form it is. Good for mind and body.",
+            'work': "Improving yourself you will. Hard work, the path is.",
+            'play': "Play one must. Release stress, good it is.",
+            'complain': "If one is not satisfied, improve yourself, you must",
+            'hug': "Embrace me, you can.",
+            'sing': "*Humming the Star Wars theme song*",
+
+            'identify': "Grand Master of the jedi order, I am",
+            'who': "Grand master, my title is. Yoda, my name provided",
+
+            # Just greetings and farewells when person-clients joins or leaves the server.
+            'joined': "Greetings!",
+            'left': "Farewell!",
+        }
+
+        def __init__(self):
+            super().__init__('Master Yoda')
+
+        def add_random_actions(self):
+            self.ACTIONS.update({'joke': random.choice(self.JOKES)})
+            self.ACTIONS.update({'time': f"{datetime.datetime.now().strftime('%X')} the time is."})
+            self.ACTIONS.update({'date': f"{datetime.datetime.now().strftime('%x')} the date is."})
+            self.ACTIONS.update({'day': f"{datetime.datetime.now().strftime('%A')} today is."})
+            self.ACTIONS.update({'hi': f"{random.choice(self.GREETINGS)}."})
+            self.ACTIONS.update({'hey': f"{random.choice(self.GREETINGS)}."})
+            self.ACTIONS.update({'hello': f"{random.choice(self.GREETINGS)}."})

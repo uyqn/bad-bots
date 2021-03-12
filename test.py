@@ -1,7 +1,3 @@
-import Participant
-import random
-import re
+import sys
 
-batman = Participant.Batman()
-
-print(isinstance(batman, Participant.Bot))
+sys.stdout.writelines("Yo")
