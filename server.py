@@ -2,7 +2,6 @@ import pickle
 import socket
 import sys
 import threading
-
 import Participant
 
 try:
@@ -36,11 +35,13 @@ def listen_for_data(c):
             if not perform_command(c, message):
                 broadcast(sender, message)
 
-        except ConnectionResetError:
+        except (ConnectionResetError, EOFError):
             leaver = clients.pop(c, Participant.Person("someone"))
-            broadcast(leaver, "left the chat!")
+            broadcast(Participant.Bot("server"), f"{leaver.name} left the chat!")
             print(f"{leaver.name} disconnected from the server")
-            c.close()
+            break
+        except OSError:
+            print("Shutting down server")
             break
 
 
@@ -63,17 +64,40 @@ def update_name(client, new_name):
     clients[client].name = new_name
 
 
+def kick(client, participant):
+    for c in clients:
+        if clients[c].name.lower() == participant.lower():
+            broadcast(Participant.Bot("Server"),
+                      f"{clients[c].name} has been kicked by {clients[client].name}")
+            clients.pop(c)
+            c.shutdown(socket.SHUT_RDWR)
+            c.close()
+
+
+def shutdown(client, arg):
+    broadcast(Participant.Bot("server"), f"{clients[client].name} is shutting down the server")
+    server.shutdown(socket.SHUT_RDWR)
+    server.close()
+
+
 commands = {
     '/update_name': update_name,
+    '/kick': kick,
+    '/server_shutdown': shutdown,
+    '/shutdown_server': shutdown
 }
 
 while True:
-    client, (ip, port) = server.accept()  # Wait for connections
+    try:
+        client, (ip, port) = server.accept()  # Wait for connections
+    except OSError:
+        server.close()
+        break
     participant = pickle.loads(client.recv(1024))  # Receive data from connected client
     print(f"{participant.name} joined from {ip}:{port}")  # Print the information for sys admins
 
     # So when a client is connected we add the client to a "list" of connected clients. We use dictionary since it is
     # faster to access the items
-    clients[client] = participant
+    clients.update({client: participant})
     threading.Thread(target=listen_for_data, args=(client,)).start()
     broadcast(Participant.Person("server"), f"{participant.name} has joined the chat!")  # Tell everybody who has joined

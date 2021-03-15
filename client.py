@@ -26,8 +26,8 @@ except (IndexError, ValueError):
 try:
     participant = \
         available_bots[sys.argv[3].lower()] \
-        if len(sys.argv) == 4 \
-        else Participant.Person(input("Choose a nickname: "))
+            if len(sys.argv) == 4 \
+            else Participant.Person(input("Choose a nickname: "))
 except KeyError:
     print(f"Sorry, cannot summon {sys.argv[3]}")
     sys.exit()
@@ -69,8 +69,9 @@ def receive_data():
                         (response.__contains__(who) or response.__contains__(identify)):
                     client.send(pickle.dumps((participant, "/update_name Botman")))
                     update_name('Botman')
-        except ConnectionResetError:
-            print("Server is down!")
+        except (ConnectionResetError, OSError, EOFError):
+            print("Disconnected from the server")
+            client.close()
             break
 
 
@@ -79,8 +80,17 @@ def send_data():
     while True:
         message = re.sub("[ ]+", " ", input().strip())  # clean up the message
         # This function performs a command if the message is a command, and nothing else otherwise
+        if message == "/logout":
+            client.close()
+            break
+
         perform_command(message)
-        client.send(pickle.dumps((participant, message)))
+        try:
+            client.send(pickle.dumps((participant, message)))
+        except (ConnectionAbortedError, EOFError, OSError):
+            print("Cannot establish connection with the server")
+            client.close()
+            break
 
 
 # At last we have to start threads to run both functions simultanously:
@@ -105,5 +115,7 @@ def update_name(new_name):
 
 
 commands = {
-    '/update_name': update_name,
+    '/update_name': update_name
 }
+
+sys.exit()
