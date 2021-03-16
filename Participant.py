@@ -28,7 +28,7 @@ class Bot:
     def add_random_actions(self):
         pass
 
-    def help(self):
+    def get_help(self):
         self.add_random_actions()
         return list(filter(lambda a: a in self.ACTIONS.keys() and a is not None, self.ACTIONS.keys()))
 

@@ -79,22 +79,22 @@ def receive_data():
 # We also want to be able to send data. Persons are the only ones able to send messages
 def send_data():
     while True:
-        # Sending empty string to check if we are still connected to the server:
         try:
+            # Sending empty string to check if we are still connected to the server:
             client.send(pickle.dumps((participant, "")))
+
+            message = re.sub("[ ]+", " ", input().strip())  # clean up the message
+            # This function performs a command if the message is a command, and nothing else otherwise
+            if message == "/logout":
+                client.close()
+                break
+
+            perform_command(message)
+            client.send(pickle.dumps((participant, message)))
         except (ConnectionAbortedError, EOFError, OSError):
             print("Cannot establish connection with the server")
             client.close()
             break
-
-        message = re.sub("[ ]+", " ", input().strip())  # clean up the message
-        # This function performs a command if the message is a command, and nothing else otherwise
-        if message == "/logout":
-            client.close()
-            break
-
-        perform_command(message)
-        client.send(pickle.dumps((participant, message)))
         time.sleep(.2)
 
 

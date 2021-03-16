@@ -1,2 +1,3 @@
-test = {}
-print(len(test))
+message = "HALLA BAGERA"
+
+print(message.split())

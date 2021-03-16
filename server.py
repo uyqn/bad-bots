@@ -4,7 +4,6 @@ import sys
 import threading
 import Participant
 
-
 try:
     ip = sys.argv[1]
     port = int(sys.argv[2])
@@ -33,7 +32,7 @@ def listen_for_data(c):
     while True:
         try:
             sender, message = pickle.loads(c.recv(1024))
-            if not perform_command(c, message):
+            if not perform_command(c, message) and len(message) > 0:
                 broadcast(sender, message)
 
         except (ConnectionResetError, EOFError):
@@ -42,9 +41,9 @@ def listen_for_data(c):
             print(f"{leaver.name} disconnected from the server")
             break
         except OSError:
-            print("Shutting down server")
-            server.close()
-            break
+            if len(clients) == 0:
+                server.close()
+                break
 
 
 # Changes done by the client must also be performed by the server to ensure that the objects are correct:
@@ -67,21 +66,37 @@ def update_name(client, new_name):
 
 
 def send_help(client, arg):
-    client.send()
+    available_commands = list(commands.keys())
+    available_commands.append("/logout")
+
+    help_message = f"These are the following available commands:\n{available_commands}"
+    for c in clients:
+        if isinstance(clients[c], Participant.Bot):
+            help_message += f"\n{clients[c].name} " \
+                            f"responds to any sentences that includes one or more of thse keywords:" \
+                            f"\n{clients[c].get_help()}"
+
+    package = pickle.dumps((Participant.Bot("server"), help_message))
+    client.send(package)
 
 
 def kick(client, participant):
+    to_be_kicked = None
     for c in clients:
         if clients[c].name.lower() == participant.lower():
-            broadcast(Participant.Bot("Server"),
+            broadcast(Participant.Bot("server"),
                       f"{clients[c].name} has been kicked by {clients[client].name}")
-            clients.pop(c)
-            c.shutdown(socket.SHUT_RDWR)
-            c.close()
+            to_be_kicked = c
+    if isinstance(to_be_kicked, socket.socket):
+        clients.pop(to_be_kicked)
+        to_be_kicked.close()
 
 
 def shutdown(client, arg):
     broadcast(Participant.Bot("server"), f"{clients[client].name} is shutting down the server")
+    for c in clients:
+        c.close()
+    clients.clear()
     server.shutdown(socket.SHUT_RDWR)
 
 
@@ -89,7 +104,6 @@ commands = {
     '/update_name': update_name,
     '/help': send_help,
     '/kick': kick,
-    '/server_shutdown': shutdown,
     '/shutdown_server': shutdown
 }
 
