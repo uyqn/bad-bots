@@ -4,6 +4,7 @@ import socket
 import pickle
 import threading
 import re
+import time
 
 # Define a dictionary of available bots:
 available_bots = {
@@ -78,6 +79,14 @@ def receive_data():
 # We also want to be able to send data. Persons are the only ones able to send messages
 def send_data():
     while True:
+        # Sending empty string to check if we are still connected to the server:
+        try:
+            client.send(pickle.dumps((participant, "")))
+        except (ConnectionAbortedError, EOFError, OSError):
+            print("Cannot establish connection with the server")
+            client.close()
+            break
+
         message = re.sub("[ ]+", " ", input().strip())  # clean up the message
         # This function performs a command if the message is a command, and nothing else otherwise
         if message == "/logout":
@@ -85,12 +94,8 @@ def send_data():
             break
 
         perform_command(message)
-        try:
-            client.send(pickle.dumps((participant, message)))
-        except (ConnectionAbortedError, EOFError, OSError):
-            print("Cannot establish connection with the server")
-            client.close()
-            break
+        client.send(pickle.dumps((participant, message)))
+        time.sleep(.2)
 
 
 # At last we have to start threads to run both functions simultanously:
