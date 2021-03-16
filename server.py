@@ -66,6 +66,10 @@ def update_name(client, new_name):
     clients[client].name = new_name
 
 
+def send_help(client, arg):
+    client.send()
+
+
 def kick(client, participant):
     for c in clients:
         if clients[c].name.lower() == participant.lower():
@@ -83,6 +87,7 @@ def shutdown(client, arg):
 
 commands = {
     '/update_name': update_name,
+    '/help': send_help,
     '/kick': kick,
     '/server_shutdown': shutdown,
     '/shutdown_server': shutdown
