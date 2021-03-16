@@ -18,6 +18,16 @@ available_bots = {
 # Force user to specify ip and port
 try:
     ip = sys.argv[1]
+    if ip == '--help' or ip == '-h':
+        print("To start a client that should connect to specified ip and port:\n"
+              "$python3 client.py <u>ip</u> <u>port</u> [ <u>bot_name</u> ]\n\n"
+              "> -b <u>bot_name</u>: specify the bot you want this client to be from the list of available bots\n"
+              ">> Current available bots: Alice, Bob, Eve\n\n"
+              "> Example usage (connecting as a person to localhost:2410):\n"
+              ">> $python3 client.py localhost 2410\n\n"
+              "> Example usage (connecting as a bot (Alice) to localhost:2410):\n"
+              ">> $python3 client.py localhost 2410 alice")
+        sys.exit()
     port = int(sys.argv[2])
 except (IndexError, ValueError):
     print("IP and port must be specified. Correct usage e.g $py client.py localhost 2410")
@@ -30,7 +40,8 @@ try:
             if len(sys.argv) == 4 \
             else Participant.Person(input("Choose a nickname: "))
 except KeyError:
-    print(f"Sorry, cannot summon {sys.argv[3]}")
+    print(f"Sorry, cannot summon {sys.argv[3]} :( but you could try one of these bots:\n"
+          f"{list(available_bots.keys())}")
     sys.exit()
 
 if isinstance(participant, Participant.Batman):

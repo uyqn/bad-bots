@@ -6,6 +6,10 @@ import Participant
 
 try:
     ip = sys.argv[1]
+    if ip == '--help' or ip == '-h':
+        print("To start a server that should connect to specified ip and port:\n"
+              "$python3 server.py <u>ip</u> <u>port</u>")
+        sys.exit()
     port = int(sys.argv[2])
 except (IndexError, ValueError):
     print("IP and port must be specified. Correct usage e.g $py server.py localhost 2410")
