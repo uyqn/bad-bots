@@ -1,3 +1,2 @@
-message = "HALLA BAGERA"
-
-print(message.split())
+d = {"Hey": 2}
+print(d.pop("Hey"))

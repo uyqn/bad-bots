@@ -41,30 +41,24 @@ def listen_for_data(c):
             if not perform_command(c, message) and len(message) > 0:
                 print(f"{sender.name}: {message}")
                 broadcast(sender, message)
-
-        except (ConnectionResetError, EOFError):
-            leaver = clients.pop(c, Participant.Person("someone"))
-            broadcast(Participant.Bot("server"), f"{leaver.name} left the chat!")
-            print(f"{leaver.name} disconnected from the server")
+        except ConnectionResetError:
+            p = clients.pop(c, Participant.Bot("Someone"))
+            print(f"{p.name} left the server")
+            broadcast(Participant.Person("server"), f"{p.name} left the chat!")
+            c.close()
             break
-        except OSError:
-            if len(clients) == 0:
-                server.close()
-                break
+        except ConnectionAbortedError:
+            break
 
 
 def host_input():
     while True:
-        try:
-            message = input("")
-            if not perform_command(host, message) and len(message) > 0:
-                broadcast(host, message)
-        except KeyError:
-            server.close()
-            break
+        message = input("")
+        if not perform_command(host, message) and len(message) > 0:
+            broadcast(host, message)
 
 
-threading.Thread(target=host_input).start()
+host_thread = threading.Thread(target=host_input, daemon=True).start()
 
 
 # Changes done by the client must also be performed by the server to ensure that the objects are correct:
@@ -78,12 +72,16 @@ def perform_command(client, message):
 
 
 def update_name(client, new_name):
-    # If a command has been performed, broadcast it to all the other clients:
-    # Broadcast as bot because we don't want the bots to respond
-    broadcast(Participant.Bot("server"), f"{clients[client].name} has changed their name to {new_name}")
+    #  Do not let host change name:
+    if client == host:
+        print("Sorry, as a host we have chosen that you should remained named as \"Host\"")
+    else:
+        # If a command has been performed, broadcast it to all the other clients:
+        # Broadcast as bot because we don't want the bots to respond
+        broadcast(Participant.Bot("server"), f"{clients[client].name} has changed their name to {new_name}")
 
-    # Then update the clients new name:
-    clients[client].name = new_name
+        # Then update the clients new name:
+        clients[client].name = new_name
 
 
 def send_help(client, arg):
@@ -97,28 +95,35 @@ def send_help(client, arg):
                             f"responds to any sentences that includes one or more of thse keywords:" \
                             f"\n{clients[c].get_help()}"
 
-    package = pickle.dumps((Participant.Bot("server"), help_message))
-    client.send(package)
+    if client == host:
+        print(help_message)
+    else:
+        package = pickle.dumps((Participant.Bot("server"), help_message))
+        client.send(package)
 
 
 def kick(client, participant):
     to_be_kicked = None
     for c in clients:
         if clients[c].name.lower() == participant.lower():
-            broadcast(Participant.Bot("server"),
-                      f"{clients[c].name} has been kicked by {clients[client].name}")
             to_be_kicked = c
+            broadcast(Participant.Bot("server"), f"{clients[c].name} has been kicked from the chat!")
+            print(f"{clients[c].name} has been kicked from the server!")
     if isinstance(to_be_kicked, socket.socket):
         clients.pop(to_be_kicked)
         to_be_kicked.close()
 
 
 def shutdown(client, arg):
-    broadcast(Participant.Bot("server"), f"{clients[client].name} is shutting down the server")
+    if client in clients:
+        broadcast(Participant.Bot("server"), f"{clients[client].name} is shutting down the server")
+    else:
+        broadcast(Participant.Bot("server"), f"The host is shutting down the server")
     for c in clients:
         c.close()
     clients.clear()
-    server.shutdown(socket.SHUT_RDWR)
+    server.close()
+    raise SystemExit
 
 
 commands = {
@@ -131,17 +136,16 @@ commands = {
 while True:
     try:
         client, (ip, port) = server.accept()  # Wait for connections
-        participant = pickle.loads(client.recv(1024))  # Receive data from connected client
-        print(f"{participant.name} joined from {ip}:{port}")  # Print the information for sys admins
-
-        # So when a client is connected we add the client to a "list" of connected clients. We use dictionary since
-        # it is faster to access the items
-        clients.update({client: participant})
-        threading.Thread(target=listen_for_data, args=(client,)).start()
-        # Tell everybody who has joined
-        broadcast(Participant.Person("server"), f"{participant.name} has joined the chat!")
-    except (OSError, EOFError):
-        server.close()
+    except OSError:
+        print("Shutting down the server")
         break
 
-sys.exit()
+    participant = pickle.loads(client.recv(1024))  # Receive data from connected client
+    print(f"{ip}:{port} joined the server as {participant.name}")  # Print the information for sys admins
+
+    # So when a client is connected we add the client to a "list" of connected clients. We use dictionary since
+    # it is faster to access the items
+    clients.update({client: participant})
+    client_thread = threading.Thread(target=listen_for_data, args=(client,)).start()
+    # Tell everybody who has joined
+    broadcast(Participant.Person("server"), f"{participant.name} has joined the chat!")

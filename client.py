@@ -50,7 +50,11 @@ if isinstance(participant, Participant.Batman):
 
 # Start the TCP connection:
 client = socket.socket()
-client.connect((ip, port))
+try:
+    client.connect((ip, port))
+except ConnectionRefusedError:
+    print(f"Cannot establish connection with server at {ip}:{port}")
+    sys.exit()
 
 # Send the server about who has connected:
 client.send(pickle.dumps(participant))
@@ -114,7 +118,7 @@ threading.Thread(target=receive_data).start()
 
 # Since only persons are able to send messages:
 if isinstance(participant, Participant.Person):
-    threading.Thread(target=send_data).start()
+    threading.Thread(target=send_data, daemon=True).start()
 
 
 # We also want certain commands to be performed:
