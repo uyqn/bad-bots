@@ -42,6 +42,7 @@ def listen_for_data(c):
             break
         except OSError:
             print("Shutting down server")
+            server.close()
             break
 
 
@@ -77,7 +78,6 @@ def kick(client, participant):
 def shutdown(client, arg):
     broadcast(Participant.Bot("server"), f"{clients[client].name} is shutting down the server")
     server.shutdown(socket.SHUT_RDWR)
-    server.close()
 
 
 commands = {
