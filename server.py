@@ -38,8 +38,8 @@ def listen_for_data(c):
     while True:
         try:
             sender, message = pickle.loads(c.recv(1024))
-            print(f"{sender.name}: {message}")
             if not perform_command(c, message) and len(message) > 0:
+                print(f"{sender.name}: {message}")
                 broadcast(sender, message)
 
         except (ConnectionResetError, EOFError):
@@ -60,7 +60,7 @@ def host_input():
             if not perform_command(host, message) and len(message) > 0:
                 broadcast(host, message)
         except KeyError:
-            socket.socket().connect((ip, port))
+            server.close()
             break
 
 
