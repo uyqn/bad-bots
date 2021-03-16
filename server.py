@@ -19,6 +19,8 @@ server = socket.socket()
 server.bind((ip, port))
 server.listen()
 
+host = Participant.Person("Host")
+
 clients = {}
 
 print("Server is running...")
@@ -36,6 +38,7 @@ def listen_for_data(c):
     while True:
         try:
             sender, message = pickle.loads(c.recv(1024))
+            print(f"{sender.name}: {message}")
             if not perform_command(c, message) and len(message) > 0:
                 broadcast(sender, message)
 
@@ -48,6 +51,20 @@ def listen_for_data(c):
             if len(clients) == 0:
                 server.close()
                 break
+
+
+def host_input():
+    while True:
+        try:
+            message = input("")
+            if not perform_command(host, message) and len(message) > 0:
+                broadcast(host, message)
+        except KeyError:
+            socket.socket().connect((ip, port))
+            break
+
+
+threading.Thread(target=host_input).start()
 
 
 # Changes done by the client must also be performed by the server to ensure that the objects are correct:
@@ -114,14 +131,17 @@ commands = {
 while True:
     try:
         client, (ip, port) = server.accept()  # Wait for connections
-    except OSError:
+        participant = pickle.loads(client.recv(1024))  # Receive data from connected client
+        print(f"{participant.name} joined from {ip}:{port}")  # Print the information for sys admins
+
+        # So when a client is connected we add the client to a "list" of connected clients. We use dictionary since
+        # it is faster to access the items
+        clients.update({client: participant})
+        threading.Thread(target=listen_for_data, args=(client,)).start()
+        # Tell everybody who has joined
+        broadcast(Participant.Person("server"), f"{participant.name} has joined the chat!")
+    except (OSError, EOFError):
         server.close()
         break
-    participant = pickle.loads(client.recv(1024))  # Receive data from connected client
-    print(f"{participant.name} joined from {ip}:{port}")  # Print the information for sys admins
 
-    # So when a client is connected we add the client to a "list" of connected clients. We use dictionary since it is
-    # faster to access the items
-    clients.update({client: participant})
-    threading.Thread(target=listen_for_data, args=(client,)).start()
-    broadcast(Participant.Person("server"), f"{participant.name} has joined the chat!")  # Tell everybody who has joined
+sys.exit()
